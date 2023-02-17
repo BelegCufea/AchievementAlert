@@ -1,6 +1,7 @@
 local ADDON_NAME = ...;
 local Addon = LibStub("AceAddon-3.0"):NewAddon(select(2, ...), ADDON_NAME, "AceConsole-3.0", "AceEvent-3.0", "LibSink-2.0");
 local AceGUI = LibStub("AceGUI-3.0")
+local LibToast = LibStub("LibToast-1.0")
 
 local Debug = Addon.DEBUG
 local Const = Addon.CONST
@@ -24,6 +25,15 @@ local AddonDB_Defaults = {
 
 local playerName = UnitName("player")
 local private = {}
+
+function private.defineToast()
+    -- Define the toast message and options
+    LibToast:Register("Achievement", function(toast, achievement, ...)
+        toast:SetTitle("Achievement")
+        toast:SetFormattedText(achievement)
+        toast:SetUrgencyLevel(...)
+    end)
+end
 
 -- Function to create a toast with the given text
 function private.showToast(text)
@@ -52,7 +62,7 @@ function private.showToast(text)
     -- Show the toast
     toast:Show()
     ]]
-
+    --[[
     local toast = AceGUI:Create("Frame")
     toast:SetTitle("")
     toast:SetLayout("Fill")
@@ -73,6 +83,10 @@ function private.showToast(text)
     toast:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
 
     C_Timer.After(3, function () AceGUI:Release(toast) end)
+    ]]
+
+    -- Show the toast message
+    LibToast:Spawn("Achievement", text, "normal")
 end
 
 function private.Alert(text, name)
@@ -137,6 +151,7 @@ end
 function Addon:OnEnable()
     Addon.db = LibStub("AceDB-3.0"):New(ADDON_NAME .. "DB", AddonDB_Defaults, true) -- set true to prefer 'Default' profile as default
     Options = Addon.db.profile
+    private.defineToast()
     Addon:RegisterChatCommand("aa", private.chatCmdShowConfig)
     Addon:RegisterEvent("CHAT_MSG_GUILD_ACHIEVEMENT", private.AchievementGained)
 end
