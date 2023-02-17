@@ -25,6 +25,14 @@
         "NOT_BOUND",
         "Add",
         "SlashCmdList",
-        "hash_SlashCmdList"
+        "hash_SlashCmdList",
+        "InterfaceOptionsFrame_OpenToCategory",
+        "NAME",
+        "CombatText_AddMessage",
+        "CombatText_StandardScroll",
+        "UIErrorsFrame",
+        "RaidNotice_AddMessage",
+        "RaidWarningFrame",
+        "CombatText_UpdateDisplayedMessages"
     ]
 }

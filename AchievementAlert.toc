@@ -1,11 +1,11 @@
 ## Interface: 100005
 ## Title: Achievement Alert
 ## Notes: Alerts you when someone in guild gets new achievement
-## Version: 0.0.1
+## Version: 0.0.2
 ## Author: Cufea
 ## SavedVariables: AchievementAlertDB
 ## DefaultState: enabled
-## X-Embeds: Ace3, CallbackHandler-1.0
+## X-Embeds: Ace3
 
 
 Libs\LibStub\LibStub.lua
@@ -17,6 +17,7 @@ Libs\AceDB-3.0\AceDB-3.0.xml
 libs\AceDBOptions-3.0\AceDBOptions-3.0.xml
 Libs\AceGUI-3.0\AceGUI-3.0.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
+libs\LibSink-2.0\LibSink-2.0\lib.xml
 
 const.lua
 debug.lua
