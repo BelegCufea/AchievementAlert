@@ -1,7 +1,7 @@
 ## Interface: 100005
 ## Title: Achievement Alert
 ## Notes: Alerts you when someone in guild gets new achievement
-## Version: 0.1.0
+## Version: 0.1.1
 ## Author: Cufea
 ## SavedVariables: AchievementAlertDB
 ## DefaultState: enabled
