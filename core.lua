@@ -1,7 +1,7 @@
 local ADDON_NAME = ...;
 local Addon = LibStub("AceAddon-3.0"):NewAddon(select(2, ...), ADDON_NAME, "AceConsole-3.0", "AceEvent-3.0", "LibSink-2.0");
-local AceGUI = LibStub("AceGUI-3.0")
 local LibToast = LibStub("LibToast-1.0")
+local LSM = LibStub("LibSharedMedia-3.0")
 
 local Debug = Addon.DEBUG
 local Const = Addon.CONST
@@ -12,6 +12,7 @@ local AddonDB_Defaults = {
         Enabled = true,
         Sound = {
             Enabled = true,
+            Alert = "AA - Default",
         },
         Toast = {
             Enabled = false,
@@ -26,8 +27,20 @@ local AddonDB_Defaults = {
 local playerName = UnitName("player")
 local private = {}
 
+local addonName, KT = ...
+
+local media = {
+    -- Sounds (Blizzard)
+    { type = "SOUND", name = "Default", filePath = 569593 }, -- sound/spells/levelup.ogg
+}
+
+function private.defineMedia()
+     for _, item in ipairs(media) do
+        LSM:Register(LSM.MediaType[item.type], "AA - "..item.name, item.filePath)
+    end
+end
+
 function private.defineToast()
-    -- Define the toast message and options
     LibToast:Register("Achievement", function(toast, achievement, ...)
         toast:SetTitle("Achievement")
         toast:SetFormattedText(achievement)
@@ -35,63 +48,13 @@ function private.defineToast()
     end)
 end
 
--- Function to create a toast with the given text
 function private.showToast(text)
-    --[[
-    -- Create the toast frame
-    local toast = CreateFrame("Frame", nil, UIParent)
-    toast:SetSize(300, 50)
-    toast:SetPoint("CENTER", UIParent, "CENTER")
-
-    -- Create the toast text
-    local toastText = toast:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    toastText:SetPoint("CENTER")
-    toastText:SetJustifyH("CENTER")
-    toastText:SetText(text)
-
-    -- Animate the toast
-    toast:SetScript("OnShow", function(self)
-        self.anim = self:CreateAnimationGroup()
-        self.anim.fadeOut = self.anim:CreateAnimation("Alpha")
-        self.anim.fadeOut:SetDuration(1)
-        self.anim.fadeOut:SetChange(-1)
-        self.anim:SetScript("OnFinished", function() self:Hide() end)
-        self.anim:Play()
-    end)
-
-    -- Show the toast
-    toast:Show()
-    ]]
-    --[[
-    local toast = AceGUI:Create("Frame")
-    toast:SetTitle("")
-    toast:SetLayout("Fill")
-    toast:SetWidth(300)
-    toast:SetHeight(50)
-    toast.frame:SetBackdropColor(0, 0, 0, 1)
-    toast.frame:SetBackdropBorderColor(0, 0, 0, 1)
-
-    local toastText = AceGUI:Create("Label")
-    toastText:SetText(text)
-    Debug:Info(GameFontNormal, "Font", "VDT")
-    toastText:SetFont(GameFontNormal:GetFont(), 12, "")
-    toastText:SetColor(1, 1, 1)
-    toastText:SetFullWidth(true)
-    toastText:SetFullHeight(true)
-    toast:AddChild(toastText)
-
-    toast:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
-
-    C_Timer.After(3, function () AceGUI:Release(toast) end)
-    ]]
-
-    -- Show the toast message
     LibToast:Spawn("Achievement", text, "normal")
 end
 
 function private.Alert(text, name)
     if Options.Sound.Enabled then
-        PlaySound( 124 ) -- "LEVELUPSOUND"
+        PlaySoundFile(LSM:Fetch("sound", Options.Sound.Alert))
     end
     if Options.Toast.Enabled then
         private.showToast(text)
@@ -134,13 +97,13 @@ function private.chatCmdShowConfig(input)
         print(format(argStr, "toggle", "Toggles watching for achievements."))
         print(format(argStr, "test", "Fire test achievement."))
         print(format(arg2Str, "help", "?", "Print this again."))
-        print(format(argStr, "version", "ver", "Print Addon Version"))
+        print(format(argStr, "ver", "Print Addon Version"))
     elseif cmd == "config" then
         -- happens twice because there is a bug in the blizz implementation and the first call doesn't work. subsequent calls do.
-        InterfaceOptionsFrame_OpenToCategory(Const.NAME)
-        InterfaceOptionsFrame_OpenToCategory(Const.NAME)
-    elseif cmd == "version" or cmd == "ver" then
-        Addon:Print(("You are running version |cff1784d1%s|r."):format(Const.VERSION))
+        InterfaceOptionsFrame_OpenToCategory(Const.METADATA.NAME)
+        InterfaceOptionsFrame_OpenToCategory(Const.METADATA.NAME)
+    elseif cmd == "ver" then
+        Addon:Print(("You are running version |cff1784d1%s|r."):format(Const.METADATA.VERSION))
     elseif cmd == "toggle" then
         Addon.db.profile.Enabled = not Addon.db.profile.Enabled
     elseif cmd == "test" then
@@ -152,6 +115,7 @@ function Addon:OnEnable()
     Addon.db = LibStub("AceDB-3.0"):New(ADDON_NAME .. "DB", AddonDB_Defaults, true) -- set true to prefer 'Default' profile as default
     Options = Addon.db.profile
     private.defineToast()
+    private.defineMedia()
     Addon:RegisterChatCommand("aa", private.chatCmdShowConfig)
     Addon:RegisterEvent("CHAT_MSG_GUILD_ACHIEVEMENT", private.AchievementGained)
 end

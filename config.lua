@@ -1,6 +1,9 @@
 local Addon = select(2, ...)
 
 local Config = Addon:NewModule("Config")
+local ConfigRegistry = LibStub("AceConfigRegistry-3.0")
+local ConfigDialog = LibStub("AceConfigDialog-3.0")
+--local LSM = LibStub("LibSharedMedia-3.0")
 
 local options = {
 	name = Addon.CONST.METADATA.NAME,
@@ -24,15 +27,35 @@ local options = {
                     end
                 },
                 Sound = {
-                    type = "toggle",
+                    type = "group",
                     order = 20,
                     name = "Sound",
-                    desc = "Plays sound on achievement gain",
-                    width = "full",
-                    get = function(info) return Addon.db.profile.Sound.Enabled end,
-                    set = function(info, value)
-                        Addon.db.profile.Sound.Enabled = value
-                    end
+                    inline = true,
+                    args = {
+                        Enabled = {
+                            type = "toggle",
+                            order = 10,
+                            name = "Play sound",
+                            get = function() return Addon.db.profile.Sound.Enabled end,
+                            set = function(info, value)
+                                Addon.db.profile.Sound.Enabled = value
+                            end,
+                        },
+                        Sound = {
+                            type = "select",
+                            order = 20,
+                            name = "Sound",
+                            desc = "Select a sound",
+                            width = 1.2,
+                            disabled = function() return  not Addon.db.profile.Sound.Enabled end,
+                            dialogControl = "LSM30_Sound",
+                            values = AceGUIWidgetLSMlists.sound,
+                            get = function() return Addon.db.profile.Sound.Alert end,
+                            set = function(info, value)
+                                Addon.db.profile.Sound.Alert = value
+                            end,
+                        },
+                    },
                 },
                 Toast = {
                     type = "toggle",
@@ -78,7 +101,7 @@ function Config:OnEnable()
     options.args.General.args.Sink.disabled = function() return not (Addon.db.profile.Sink.Enabled) end
     options.args.Profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(Addon.db)
     options.args.Profile.order = 80
-	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(Addon.CONST.METADATA.NAME, options)
-	LibStub("AceConfigDialog-3.0"):AddToBlizOptions(Addon.CONST.METADATA.NAME)
+	ConfigRegistry:RegisterOptionsTable(Addon.CONST.METADATA.NAME, options)
+	ConfigDialog:AddToBlizOptions(Addon.CONST.METADATA.NAME)
     Addon:SetSinkStorage(Addon.db.profile)
 end
