@@ -24,7 +24,7 @@ local AddonDB_Defaults = {
     }
 }
 
-local playerName = UnitName("player")
+local playerName = UnitName("player") .. "-" .. GetRealmName()
 local private = {}
 
 local addonName, KT = ...
@@ -53,36 +53,35 @@ function private.showToast(text)
 end
 
 function private.Alert(text, name)
+    C_GuildInfo.GuildRoster()
+    local numMembers = GetNumGuildMembers()
+    local guild = {}
+    for i=1, numMembers do
+        local fullName, rankName, rankIndex, level, classDisplayName, zone, publicNote, officerNote, isOnline, status, class, achievementPoints, achievementRank, isMobile, canSoR, repStanding, guid = GetGuildRosterInfo(i)
+        guild[fullName] = {level, class}
+        if fullName == name then
+            name = string.format("[|c%s%s|r:%d]", RAID_CLASS_COLORS[class].colorStr, Ambiguate(name, "guild"), level)
+            break
+        end
+    end
+    local alertText = string.format(text, name)
     if Options.Sound.Enabled then
         PlaySoundFile(LSM:Fetch("sound", Options.Sound.Alert))
     end
     if Options.Toast.Enabled then
-        private.showToast(text)
+        private.showToast(alertText)
     end
 
     if Options.Sink.Enabled then
-        Addon:Pour(text, 1, 1, 1)
+        Addon:Pour(alertText, 1, 1, 1)
     end
 end
 
 function private.AchievementGained(event, text, name)
     if not Options.Enabled then return end
 
-    if Options.Debug then
-        local args = {
-            event = event,
-            text = text,
-            name = name,
-        }
-        Debug:Info(args, "Event", "VDT")
-        Debug:Info(event, "event")
-        Debug:Info(text, "text")
-        Debug:Info(name, "name")
-    end
-
     if type(name) ~= "string" then return end
 
-    name = Ambiguate(name, "none")
     if playerName == name then return end
     private.Alert(text, name)
 end
@@ -106,8 +105,13 @@ function private.chatCmdShowConfig(input)
         Addon:Print(("You are running version |cff1784d1%s|r."):format(Const.METADATA.VERSION))
     elseif cmd == "toggle" then
         Addon.db.profile.Enabled = not Addon.db.profile.Enabled
+        if Addon.db.profile.Enabled then
+            Addon:Print("Alerts are |cff00ff00Enabled|r")
+        else
+            Addon:Print("Alerts are |cffff0000Disabled|r")
+        end
     elseif cmd == "test" then
-        private.Alert("You will never ever get any achievement again!", "You fool")
+        private.Alert("%s will never ever get any achievement again!", playerName)
     end
 end
 
