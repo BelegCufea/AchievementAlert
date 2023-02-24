@@ -159,6 +159,7 @@
         "LFG_LIST_GUILD_MEMBER",
         "NOTE_COLON",
         "GUILD_OFFICERNOTES_LABEL",
-        "RAID"
+        "RAID",
+        "NUM_CHAT_WINDOWS"
     ]
 }

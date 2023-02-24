@@ -89,6 +89,12 @@ local options = {
                         Addon.db.profile.Debug = value
                     end
                 },
+                Test = {
+                    type = "execute",
+                    order = 100,
+                    name = "Test Alert",
+                    func = function() Addon:Test() end
+                }
             },
         },
     },
