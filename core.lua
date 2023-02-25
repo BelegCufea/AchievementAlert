@@ -50,51 +50,148 @@ function private.defineMedia()
     end
 end
 
-function private.defineToast()
-    LibToast:Register("Achievement", function(toast, achievement, ...)
-        toast:SetTitle("Achievement")
+function private.defineLibToast()
+    LibToast:Register("AchievementAlert", function(toast, achievement, ...)
+        toast:SetTitle("AchievementAlert")
         toast:SetFormattedText(achievement)
         toast:SetUrgencyLevel(...)
     end)
 end
 
+function private.Toast_Setup()
+    local E, C, L = unpack(ls_Toasts)
+    E:RegisterOptions("achievementalert", {
+        enabled = true,
+        anchor = 1,
+        dnd = false,
+    }, {
+        name = "Achievement Alert",
+        get = function(info)
+            return C.db.profile.types.achievementalert[info[#info]]
+        end,
+        set = function(info, value)
+            C.db.profile.types.achievementalert[info[#info]] = value
+        end,
+        args = {
+            enabled = {
+                order = 1,
+                type = "toggle",
+                name = L["ENABLE"],
+                set = function(_, value)
+                    C.db.profile.types.achievementalert.enabled = value
+
+                    if value then
+                        private.Toast_OnEnable()
+                    else
+                        private.Toast_OnDisable()
+                    end
+                end
+            },
+            dnd = {
+                order = 2,
+                type = "toggle",
+                name = L["DND"],
+                desc = L["DND_TOOLTIP"],
+            },
+            test = {
+                type = "execute",
+                order = 99,
+                width = "full",
+                name = L["TEST"],
+                func = private.Toast_Test,
+            },
+        },
+    })
+    E:RegisterSystem("achievementalert", private.Toast_OnEnable, private.Toast_OnDisable, private.Toast_Test)
+end
+
+function private.Toast_Test()
+    Addon:Test()
+end
+
+function private.Toast_OnEnable()
+end
+
+function private.Toast_OnDisable()
+end
+
+function private.Toast_OnClick(self)
+	if self._data.ach_id and not InCombatLockdown() then
+		if not AchievementFrame then
+			AchievementFrame_LoadUI()
+		end
+
+		if AchievementFrame then
+			ShowUIPanel(AchievementFrame)
+			AchievementFrame_SelectAchievement(self._data.ach_id)
+		end
+	end
+end
+
+function private.Toast_OnEnter(self)
+	if self._data.ach_id then
+		local _, name, _, _, month, day, year, description = GetAchievementInfo(self._data.ach_id)
+		if name then
+			if day and day > 0 then
+				GameTooltip:AddDoubleLine(name, FormatShortDate(day, month, year), nil, nil, nil, 0.5, 0.5, 0.5)
+			else
+				GameTooltip:AddLine(name)
+			end
+
+			if description then
+				GameTooltip:AddLine(description, 1, 1, 1, true)
+			end
+		end
+
+		GameTooltip:Show()
+	end
+end
+
 function private.showToast(name, text)
     if ls_Toasts then
-        local LST = ls_Toasts
-        local E,C = LST[1], LST[2]
+        local E, C, L = unpack(ls_Toasts)
+        if C.db.profile.types.achievementalert and C.db.profile.types.achievementalert.enabled then
 
-        local toast = E:GetToast()
-        local achievementName = string.match(text, "|.-|r")
-        local achievementID = string.match(text, "|Hachievement:(%d+):")
+            local toast = E:GetToast()
+            local achievementName = string.match(text, "|.-|r")
+            local achievementID = string.match(text, "|Hachievement:(%d+):")
 
-        Debug:Info(achievementName, "Achievement")
-        Debug:Info(achievementID, "ID")
+            Debug:Info(achievementName, "Achievement")
+            Debug:Info(achievementID, "ID")
 
-        toast.Title:SetText(name)
-        toast.Text:SetText(achievementName)
-        toast.IconText1:SetText("")
+            toast.Title:SetText(name)
+            toast.Text:SetText(achievementName)
+            toast.IconText1:SetText("")
 
-        if achievementID then
-            local _, _, points, _, _, _, _, _, _, icon, _, _ = GetAchievementInfo(achievementID)
-            if not toast:ShouldHideLeaves() then
-                toast:ShowLeaves()
+            if achievementID then
+                local _, _, points, _, _, _, _, _, _, icon, _, _ = GetAchievementInfo(achievementID)
+                if not toast:ShouldHideLeaves() then
+                    toast:ShowLeaves()
+                end
+                if C.db.profile.colors.border then
+                    toast.Border:SetVertexColor(1, 0.675, 0.125) -- ACHIEVEMENT_GOLD_BORDER_COLOR
+                    toast:SetLeavesVertexColor(1, 0.675, 0.125)
+                end
+                if C.db.profile.colors.icon_border then
+                    toast.IconBorder:SetVertexColor(1, 0.675, 0.125)
+                end
+                toast.IconText1:SetText(points == 0 and "" or points)
+                toast.Icon:SetTexture(icon)
+                toast.IconBorder:Show()
+
+                toast._data.ach_id = achievementID
+                toast:HookScript("OnClick", private.Toast_OnClick)
+                toast:HookScript("OnEnter", private.Toast_OnEnter)
             end
-            if C.db.profile.colors.border then
-                toast.Border:SetVertexColor(1, 0.675, 0.125) -- ACHIEVEMENT_GOLD_BORDER_COLOR
-                toast:SetLeavesVertexColor(1, 0.675, 0.125)
-            end
-            if C.db.profile.colors.icon_border then
-                toast.IconBorder:SetVertexColor(1, 0.675, 0.125)
-            end
-            toast.IconText1:SetText(points == 0 and "" or points)
-            toast.Icon:SetTexture(icon)
-            toast.IconBorder:Show()
+
+            toast:Spawn(C.db.profile.types.achievement.anchor, C.db.profile.types.achievement.dnd)
+
+            return
         end
-
-        toast:Spawn(C.db.profile.types.achievement.anchor, C.db.profile.types.achievement.dnd)
-    else
-        LibToast:Spawn("Achievement", text, "normal")
     end
+    local achievementText = string.format(text, name)
+    Debug:Info(achievementText, "AchievementText")
+    LibToast:Spawn("AchievementAlert", achievementText, "normal")
 end
 
 function private.Alert(text, name)
@@ -170,10 +267,13 @@ end
 function Addon:OnEnable()
     Addon.db = LibStub("AceDB-3.0"):New(ADDON_NAME .. "DB", AddonDB_Defaults, true) -- set true to prefer 'Default' profile as default
     Options = Addon.db.profile
-    private.defineToast()
+    private.defineLibToast()
     private.defineMedia()
     Addon:RegisterChatCommand("aa", private.chatCmdShowConfig)
     Addon:RegisterEvent("CHAT_MSG_GUILD_ACHIEVEMENT", private.AchievementGained)
+    if ls_Toasts then
+        private.Toast_Setup()
+    end
 end
 
 function Addon:OnDisable()
