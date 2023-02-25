@@ -39,7 +39,7 @@ function Addon:Test()
     local dateTable = date("*t", currentTime)
     local day = dateTable.day
     local month = dateTable.month
-    local year = dateTable.year
+    local year = dateTable.year % 100
     local achievement = "|cffffff00|Hachievement:411:"..UnitGUID('player')..":1:"..month..":"..day..":"..year..":4294967295:4294967295:4294967295:4294967295|h[Murky]|h|r"
     private.Alert("%s will never ever get " .. achievement .. " achievement!", playerName)
 end
