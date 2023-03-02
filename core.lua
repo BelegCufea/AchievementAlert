@@ -16,6 +16,7 @@ local AddonDB_Defaults = {
         },
         Toast = {
             Enabled = false,
+            LST = true,
         },
         Sink = {
             Enabled = false,
@@ -66,32 +67,15 @@ function private.Toast_Setup()
         dnd = false,
     }, {
         name = "Achievement Alert",
-        get = function(info)
-            return C.db.profile.types.achievementalert[info[#info]]
-        end,
-        set = function(info, value)
-            C.db.profile.types.achievementalert[info[#info]] = value
-        end,
         args = {
             enabled = {
                 order = 1,
                 type = "toggle",
                 name = L["ENABLE"],
-                set = function(_, value)
-                    C.db.profile.types.achievementalert.enabled = value
-
-                    if value then
-                        private.Toast_OnEnable()
-                    else
-                        private.Toast_OnDisable()
-                    end
-                end
-            },
-            dnd = {
-                order = 2,
-                type = "toggle",
-                name = L["DND"],
-                desc = L["DND_TOOLTIP"],
+                get = function(info) return Options.Toast.LST end,
+                set = function(info, value)
+                    Options.Toast.LST = value
+                end,
             },
             test = {
                 type = "execute",
@@ -148,46 +132,43 @@ function private.Toast_OnEnter(self)
 end
 
 function private.showToast(name, text)
-    if ls_Toasts then
+    if ls_Toasts and Addon.db.profile.Toast.LST then
         local E, C, L = unpack(ls_Toasts)
-        if C.db.profile.types.achievementalert and C.db.profile.types.achievementalert.enabled then
+        local toast = E:GetToast()
+        local achievementName = string.match(text, "|.-|r")
+        local achievementID = string.match(text, "|Hachievement:(%d+):")
 
-            local toast = E:GetToast()
-            local achievementName = string.match(text, "|.-|r")
-            local achievementID = string.match(text, "|Hachievement:(%d+):")
+        Debug:Info(achievementName, "Achievement")
+        Debug:Info(achievementID, "ID")
 
-            Debug:Info(achievementName, "Achievement")
-            Debug:Info(achievementID, "ID")
+        toast.Title:SetText(name)
+        toast.Text:SetText(achievementName)
+        toast.IconText1:SetText("")
 
-            toast.Title:SetText(name)
-            toast.Text:SetText(achievementName)
-            toast.IconText1:SetText("")
-
-            if achievementID then
-                local _, _, points, _, _, _, _, _, _, icon, _, _ = GetAchievementInfo(achievementID)
-                if not toast:ShouldHideLeaves() then
-                    toast:ShowLeaves()
-                end
-                if C.db.profile.colors.border then
-                    toast.Border:SetVertexColor(1, 0.675, 0.125) -- ACHIEVEMENT_GOLD_BORDER_COLOR
-                    toast:SetLeavesVertexColor(1, 0.675, 0.125)
-                end
-                if C.db.profile.colors.icon_border then
-                    toast.IconBorder:SetVertexColor(1, 0.675, 0.125)
-                end
-                toast.IconText1:SetText(points == 0 and "" or points)
-                toast.Icon:SetTexture(icon)
-                toast.IconBorder:Show()
-
-                toast._data.ach_id = achievementID
-                toast:HookScript("OnClick", private.Toast_OnClick)
-                toast:HookScript("OnEnter", private.Toast_OnEnter)
+        if achievementID then
+            local _, _, points, _, _, _, _, _, _, icon, _, _ = GetAchievementInfo(achievementID)
+            if not toast:ShouldHideLeaves() then
+                toast:ShowLeaves()
             end
+            if C.db.profile.colors.border then
+                toast.Border:SetVertexColor(1, 0.675, 0.125) -- ACHIEVEMENT_GOLD_BORDER_COLOR
+                toast:SetLeavesVertexColor(1, 0.675, 0.125)
+            end
+            if C.db.profile.colors.icon_border then
+                toast.IconBorder:SetVertexColor(1, 0.675, 0.125)
+            end
+            toast.IconText1:SetText(points == 0 and "" or points)
+            toast.Icon:SetTexture(icon)
+            toast.IconBorder:Show()
 
-            toast:Spawn(C.db.profile.types.achievement.anchor, C.db.profile.types.achievement.dnd)
-
-            return
+            toast._data.ach_id = achievementID
+            toast:HookScript("OnClick", private.Toast_OnClick)
+            toast:HookScript("OnEnter", private.Toast_OnEnter)
         end
+
+        toast:Spawn(C.db.profile.types.achievement.anchor, C.db.profile.types.achievement.dnd)
+
+        return
     end
     local achievementText = string.format(text, name)
     Debug:Info(achievementText, "AchievementText")
