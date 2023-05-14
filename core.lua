@@ -138,8 +138,8 @@ function private.showToast(name, text)
         local achievementName = string.match(text, "|.-|r")
         local achievementID = string.match(text, "|Hachievement:(%d+):")
 
-        Debug:Info(achievementName, "Achievement")
-        Debug:Info(achievementID, "ID")
+        Debug:Info("Achievement", achievementName)
+        Debug:Info("ID", achievementID)
 
         toast.Title:SetText(name)
         toast.Text:SetText(achievementName)
@@ -171,7 +171,7 @@ function private.showToast(name, text)
         return
     end
     local achievementText = string.format(text, name)
-    Debug:Info(achievementText, "AchievementText")
+    Debug:Info("AchievementText", achievementText)
     LibToast:Spawn("AchievementAlert", achievementText, "normal")
 end
 
