@@ -246,6 +246,10 @@ function private.chatCmdShowConfig(input)
     end
 end
 
+function Addon:RefreshConfig()
+    Options = self.db.profile
+end
+
 function Addon:OnEnable()
     Addon.db = LibStub("AceDB-3.0"):New(ADDON_NAME .. "DB", AddonDB_Defaults, true) -- set true to prefer 'Default' profile as default
     Options = Addon.db.profile
@@ -256,6 +260,10 @@ function Addon:OnEnable()
     if ls_Toasts then
         private.Toast_Setup()
     end
+
+    self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
+    self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")
+    self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
 end
 
 function Addon:OnDisable()

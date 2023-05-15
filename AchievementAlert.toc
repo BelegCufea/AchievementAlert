@@ -1,7 +1,7 @@
 ## Interface: 100100
 ## Title: Achievement Alert
 ## Notes: Alerts you when someone in guild gets new achievement
-## Version: 0.2.3
+## Version: 0.2.4
 ## Author: Cufea
 ## SavedVariables: AchievementAlertDB
 ## OptionalDeps: ls_Toasts
