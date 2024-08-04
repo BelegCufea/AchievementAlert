@@ -1,7 +1,7 @@
-## Interface: 100100
+## Interface: 110000
 ## Title: Achievement Alert
 ## Notes: Alerts you when someone in guild gets new achievement
-## Version: 0.2.4
+## Version: 0.2.5
 ## Author: Cufea
 ## SavedVariables: AchievementAlertDB
 ## OptionalDeps: ls_Toasts
@@ -21,6 +21,7 @@ Libs\AceConfig-3.0\AceConfig-3.0.xml
 Libs\LibSink-2.0\LibSink-2.0\lib.xml
 Libs\LibToast-1.0\lib.xml
 Libs\LibSharedMedia-3.0\lib.xml
+Libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 
 const.lua
 debug.lua
