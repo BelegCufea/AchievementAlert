@@ -160,6 +160,43 @@
         "NOTE_COLON",
         "GUILD_OFFICERNOTES_LABEL",
         "RAID",
-        "NUM_CHAT_WINDOWS"
+        "NUM_CHAT_WINDOWS",
+        "select",
+        "tostring",
+        "pairs",
+        "next",
+        "type",
+        "unpack",
+        "loadstring",
+        "assert",
+        "error",
+        "setmetatable",
+        "getmetatable",
+        "rawset",
+        "rawget",
+        "xpcall",
+        "table",
+        "string",
+        "CreateFrame",
+        "geterrorhandler",
+        "IsLoggedIn",
+        "pcall",
+        "tonumber",
+        "_G"
+    ],
+    "Lua.runtime.version": "Lua 5.1",
+    "Lua.runtime.builtin": {
+        "basic": "disable",
+        "debug": "disable",
+        "io": "disable",
+        "math": "disable",
+        "os": "disable",
+        "package": "disable",
+        "string": "disable",
+        "table": "disable",
+        "utf8": "disable"
+    },
+    "Lua.workspace.library": [
+        "~\\.vscode\\extensions\\ketho.wow-api-0.16.8\\Annotations"
     ]
 }
